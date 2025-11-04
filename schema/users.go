@@ -2,6 +2,16 @@ package schema
 
 import "go.mongodb.org/mongo-driver/bson/primitive"
 
+/*
+DONT CHANGE THIS FILE UNLESS YOU KNOW WHAT YOU'RE DOING
+
+-- Hints
+omitempty: omit the field if its value is empty
+
+If you change this struct, make sure to update the database migration
+scripts accordingly.(Seed, and any post requests you make)
+*/
+
 type User struct {
 	ID        primitive.ObjectID   `bson:"_id,omitempty" json:"id"`
 	Username  string               `bson:"username" json:"username"`
