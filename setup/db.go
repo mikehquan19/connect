@@ -10,9 +10,9 @@ import (
 )
 
 var Client *mongo.Client
-var DB *mongo.Database
+var DB *mongo.Database // Used in controllers
 
-// ConnectDB connects the server with the Mongo Database
+
 func ConnectDB(uri, dbName string) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()

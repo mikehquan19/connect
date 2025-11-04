@@ -8,6 +8,10 @@ After that, put the connection string to the ```.env``` file
 
 Run:
 ```
-go build -o connect main.go && chmod +x connect
+go build -o connect server.go && chmod +x connect
 ./connect
+
+OR 
+
+go run server.go
 ```
