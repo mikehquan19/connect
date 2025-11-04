@@ -1,0 +1,19 @@
+# Go build artifacts
+connect
+*.exe
+*.out
+*.test
+
+# Environment files
+.env
+
+# Dependency directories
+vendor/
+
+# IDE / editor junk
+.vscode/
+.idea/
+.DS_Store
+
+# OS junk
+Thumbs.db
