@@ -9,15 +9,14 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
-var Client *mongo.Client
-var DB *mongo.Database
-
 // ConnectDB connects the server with the Mongo Database
-func ConnectDB(uri, dbName string) {
+func ConnectDB(mongoUri string, databaseName string) *mongo.Database {
+	var database *mongo.Database
+
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
-	client, err := mongo.Connect(ctx, options.Client().ApplyURI(uri))
+	client, err := mongo.Connect(ctx, options.Client().ApplyURI(mongoUri))
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -26,7 +25,7 @@ func ConnectDB(uri, dbName string) {
 		log.Fatal("MongoDB connection failed:", err)
 	}
 
-	Client = client
-	DB = client.Database(dbName)
-	log.Println("Connected to MongoDB:", dbName)
+	database = client.Database(databaseName)
+	log.Println("Connected to MongoDB:", databaseName)
+	return database
 }

@@ -2,24 +2,53 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
-	"github.com/gin-gonic/gin"
-	"github.com/joho/godotenv"
-	"github.com/mikehquan19/connect/routes"
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/handler/extension"
+	"github.com/99designs/gqlgen/graphql/handler/lru"
+	"github.com/99designs/gqlgen/graphql/handler/transport"
+	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/mikehquan19/connect/graph"
 	"github.com/mikehquan19/connect/setup"
+	"github.com/vektah/gqlparser/v2/ast"
 )
 
+const defaultPort = "8080"
+
 func main() {
-	if err := godotenv.Load(); err != nil {
-		log.Println("No .env file found, using system env vars")
+	// Get the port and mongo uri
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = defaultPort
 	}
 
-	setup.ConnectDB(os.Getenv("MONGO_URI"), "workshop")
+	mongoUri := "mongodb+srv://mikehquan19:7IoJhrnbMNAGDEQg@worshop-cluster.6meabnl.mongodb.net/?appName=Worshop-cluster"
+	if mongoUri == "" {
+		panic("error getting mongo uri")
+	}
 
-	r := gin.Default()
+	// Setting up the resolver
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+		DB: setup.ConnectDB(mongoUri, "workshop"),
+	}}))
+	srv.Use(extension.FixedComplexityLimit(100))
 
-	routes.RegisterUserRoutes(r)
+	srv.AddTransport(transport.Options{})
+	srv.AddTransport(transport.GET{})
+	srv.AddTransport(transport.POST{})
 
-	r.Run(":8080")
+	srv.SetQueryCache(lru.New[*ast.QueryDocument](1000))
+
+	srv.Use(extension.Introspection{})
+	srv.Use(extension.AutomaticPersistedQuery{
+		Cache: lru.New[string](100),
+	})
+
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
+
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
+	log.Fatal(http.ListenAndServe(":"+port, nil))
 }

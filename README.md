@@ -1,13 +1,26 @@
-# Content for the API Workshop
+# GRAPH QL USING GOLANG 
 
-## How to run: 
+## GraphQL: 
 
-Setup the Mongo database on Atlas, and get the connection string for the cluster.
+- Users get exactly what they want so that they can avoid overfetching and underfetching => smaller JSON payloads and faster network transfers.
 
-After that, put the connection string to the ```.env``` file
+- Single endpoint that allows you to do everything. 
 
-Run:
+- Support of nested data
+
+
+Run
 ```
-go build -o connect main.go && chmod +x connect
-./connect
+go run github.com/99designs/gqlgen init  
+``` 
+Then it will do some code generation to all the stuff 
+
+Edit the schema 
+
+Run
 ```
+go get github.com/99designs/gqlgen@v0.17.81 
+go run github.com/99designs/gqlgen generate          
+```
+
+We got the resolver, then implement the resolver
