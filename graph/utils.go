@@ -40,8 +40,7 @@ func transformArtwork(dbArtwork schema.Artwork) *model.Artwork {
 	}
 }
 
-// unmarshalArtworks will marshal the data from mongo to artworks
-// and then transform them to GraphQL responses.
+// unmarshalArtworks marshals the data from mongo to artworks
 func unmarshalArtworks(mongoCursor *mongo.Cursor) ([]*model.Artwork, error) {
 	// Unmarshal the slice of artworks
 	var dbArtworks []schema.Artwork
@@ -72,7 +71,7 @@ func TransformChapter(dbChapter schema.Chapter) *model.Chapter {
 	}
 }
 
-// unmarshalChapters will marshal the data from mongo to chapters
+// unmarshalChapters marshals the data from mongo to chapters
 // and then transform them to GraphQL responses.
 func unmarshalChapters(mongoCursor *mongo.Cursor) ([]*model.Chapter, error) {
 	// Unmarshal the slice of chapters

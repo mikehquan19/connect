@@ -15,13 +15,11 @@ import (
 	"github.com/vektah/gqlparser/v2/ast"
 )
 
-const defaultPort = "8080"
-
 func main() {
 	// Get the port and mongo uri
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = defaultPort
+		port = "8080"
 	}
 
 	mongoUri := "mongodb+srv://mikehquan19:7IoJhrnbMNAGDEQg@worshop-cluster.6meabnl.mongodb.net/?appName=Worshop-cluster"
@@ -29,9 +27,17 @@ func main() {
 		panic("error getting mongo uri")
 	}
 
+	dbName := os.Getenv("DATABASE_NAME")
+	if dbName == "" {
+		dbName = "workshop"
+	}
+
 	// Setting up the resolver
+	database := setup.ConnectDB(mongoUri, dbName)
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
-		DB: setup.ConnectDB(mongoUri, "workshop"),
+		UserCollection: database.Collection("users"),
+		ArtCollection:  database.Collection("artworks"),
+		ChapCollection: database.Collection("chapters"),
 	}}))
 	srv.Use(extension.FixedComplexityLimit(100))
 
