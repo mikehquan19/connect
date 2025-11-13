@@ -28,7 +28,8 @@ func (r *queryResolver) Chapter(ctx context.Context, id string) (*model.Chapter,
 }
 
 // Query the artwork of the chapter
-func (r *chapterResolver) Artwork(ctx context.Context, chap *model.Chapter) (*model.Artwork, error) {
+func (r *chapterResolver) Artwork(
+	ctx context.Context, chap *model.Chapter) (*model.Artwork, error) {
 	artworkID, err := primitive.ObjectIDFromHex(chap.Artwork.ID)
 	if err != nil {
 		return nil, err
