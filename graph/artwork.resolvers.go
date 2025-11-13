@@ -13,10 +13,10 @@ import (
 // Artworks is the resolver for the artworks field.
 // Query the list of latest artworks
 func (r *queryResolver) Artworks(ctx context.Context) ([]*model.Artwork, error) {
-	// Sort by the last updated date and then created date
 	cursor, err := r.ArtCollection.Find(
 		context.TODO(),
 		bson.M{},
+		// Sort by the last updated date and then created date
 		options.Find().SetSort(bson.D{
 			{Key: "updatedAt", Value: -1},
 			{Key: "createdAt", Value: -1},

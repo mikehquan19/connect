@@ -34,11 +34,13 @@ func main() {
 
 	// Setting up the resolver
 	database := setup.ConnectDB(mongoUri, dbName)
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{
+	resolver := graph.Resolver{
 		UserCollection: database.Collection("users"),
 		ArtCollection:  database.Collection("artworks"),
 		ChapCollection: database.Collection("chapters"),
-	}}))
+	}
+
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver}))
 	srv.Use(extension.FixedComplexityLimit(100))
 
 	srv.AddTransport(transport.Options{})
@@ -53,7 +55,7 @@ func main() {
 	})
 
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
+	http.Handle("/query", resolver.Middleware()(srv))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

@@ -12,7 +12,6 @@ import (
 // ConnectDB connects the server with the Mongo Database
 func ConnectDB(mongoUri string, databaseName string) *mongo.Database {
 	var database *mongo.Database
-
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
