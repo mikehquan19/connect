@@ -40,8 +40,8 @@ func transformArtwork(dbArtwork schema.Artwork) *model.Artwork {
 	}
 }
 
-// unmarshalArtworks marshals the data from mongo to artworks
-func unmarshalArtworks(mongoCursor *mongo.Cursor) ([]*model.Artwork, error) {
+// decodeArtworks decodes the data from mongo to list of artworks
+func decodeArtworks(mongoCursor *mongo.Cursor) ([]*model.Artwork, error) {
 	// Unmarshal the slice of artworks
 	var dbArtworks []schema.Artwork
 	err := mongoCursor.All(context.TODO(), &dbArtworks)
@@ -50,9 +50,9 @@ func unmarshalArtworks(mongoCursor *mongo.Cursor) ([]*model.Artwork, error) {
 	}
 
 	// Transform database artworks to graphql artworks
-	var gqlArtworks []*model.Artwork
-	for _, dbArtwork := range dbArtworks {
-		gqlArtworks = append(gqlArtworks, transformArtwork(dbArtwork))
+	gqlArtworks := make([]*model.Artwork, len(dbArtworks))
+	for i, dbArtwork := range dbArtworks {
+		gqlArtworks[i] = transformArtwork(dbArtwork)
 	}
 	return gqlArtworks, nil
 }
@@ -71,9 +71,9 @@ func TransformChapter(dbChapter schema.Chapter) *model.Chapter {
 	}
 }
 
-// unmarshalChapters marshals the data from mongo to chapters
+// decodeChapters decodes the data from MongoDB to list of chapters
 // and then transform them to GraphQL responses.
-func unmarshalChapters(mongoCursor *mongo.Cursor) ([]*model.Chapter, error) {
+func decodeChapters(mongoCursor *mongo.Cursor) ([]*model.Chapter, error) {
 	// Unmarshal the slice of chapters
 	var dbChapters []schema.Chapter
 	err := mongoCursor.All(context.TODO(), &dbChapters)

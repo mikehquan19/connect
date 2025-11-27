@@ -3,6 +3,7 @@ package graph
 import (
 	"context"
 
+	"github.com/graph-gophers/dataloader"
 	"github.com/mikehquan19/connect/graph/model"
 	"github.com/mikehquan19/connect/schema"
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,7 +27,7 @@ func (r *queryResolver) Artworks(ctx context.Context) ([]*model.Artwork, error) 
 		return nil, err
 	}
 
-	artworks, err := unmarshalArtworks(cursor)
+	artworks, err := decodeArtworks(cursor)
 	return artworks, err
 }
 
@@ -51,19 +52,15 @@ func (r *queryResolver) Artwork(ctx context.Context, id string) (*model.Artwork,
 // Author is the resolver for the users field.
 // Query the author embedded in the artwork
 func (r *artworkResolver) Author(ctx context.Context, work *model.Artwork) (*model.User, error) {
-	authorId, err := primitive.ObjectIDFromHex(work.Author.ID)
+	loaders := ctx.Value(LoadersKey).(*Loaders)
+	channels := loaders.Author.Load(ctx, dataloader.StringKey(work.Author.ID))
+
+	results, err := channels()
 	if err != nil {
 		return nil, err
 	}
 
-	var author schema.User
-	err = r.UserCollection.FindOne(
-		context.TODO(), bson.M{"_id": authorId}).Decode(&author)
-	if err != nil {
-		return nil, err
-	}
-
-	return transformUser(author), nil
+	return results.(*model.User), nil
 }
 
 // Chapters is the resolver for the chapters field.
@@ -83,6 +80,6 @@ func (r *artworkResolver) Chapters(ctx context.Context, work *model.Artwork) ([]
 		return nil, err
 	}
 
-	chapters, err := unmarshalChapters(cursor)
+	chapters, err := decodeChapters(cursor)
 	return chapters, err
 }

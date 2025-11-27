@@ -14,7 +14,7 @@ THIS WONT SUFFER FROM THE N + 1 QUERY PROBLEM BECAUSE WE HAVE A DATALOADER
 */
 
 // Users is the resolver for the users field.
-// Query the list of users
+// Query the list of users.
 func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 	// Query the list of artists (ruling out the users)
 	cursor, err := r.UserCollection.Find(context.TODO(), bson.M{"role": "ARTIST"})
@@ -30,9 +30,9 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 
 	// Transform DB users to the GraphQL Users
 	// If the client requests the artworks, then user resolver will handle that
-	var gqlUsers []*model.User
-	for _, dbUser := range dbUsers {
-		gqlUsers = append(gqlUsers, transformUser(dbUser))
+	gqlUsers := make([]*model.User, len(dbUsers))
+	for i, dbUser := range dbUsers {
+		gqlUsers[i] = transformUser(dbUser)
 	}
 	return gqlUsers, nil
 }
@@ -40,16 +40,12 @@ func (r *queryResolver) Users(ctx context.Context) ([]*model.User, error) {
 // Artworks is the resolver for the artworks field.
 // Query the list of artworks embedded in the author
 func (r *userResolver) Artworks(ctx context.Context, user *model.User) ([]*model.Artwork, error) {
-	// Get the loaders from the request context using a key
 	loaders := ctx.Value(LoadersKey).(*Loaders)
+	channel := loaders.Artworks.Load(ctx, dataloader.StringKey(user.ID))
 
-	// Load the key, in this case the user Id to the batch function
-	thunk := loaders.Artworks.Load(ctx, dataloader.StringKey(user.ID))
-
-	// Execute the batch function
-	result, err := thunk()
+	results, err := channel()
 	if err != nil {
 		return nil, err
 	}
-	return result.([]*model.Artwork), nil
+	return results.([]*model.Artwork), nil
 }
